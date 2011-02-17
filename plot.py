@@ -89,7 +89,7 @@ class PlotCanvas(wx.Panel):
 		dc.SetTextForeground(self.GetForegroundColour())
 		dc.SetFont(wx.Font(7, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
 
-		padleft, pady = dc.GetTextExtent('M' * (len(self.str_max_y) + 1))
+		padleft, pady = dc.GetTextExtent(''.join(['xx', self.str_max_y]))
 		padright, pady = dc.GetTextExtent('M' * (int(len(self.str_max_x) / 2) + 1))
 		left = padleft
 		top = 2 * pady
