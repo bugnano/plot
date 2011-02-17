@@ -36,8 +36,8 @@ class PlotCanvas(wx.Panel):
 		self.max_x = 1
 		self.max_y = 1
 		self.str_f = '%d'
-		self.str_max_x = self.str_f % self.max_x
-		self.str_max_y = '%d' % self.max_y
+		self.str_max_x = '%d' % self.max_x
+		self.str_max_y = self.str_f % self.max_y
 
 		self.plots = []
 
@@ -47,12 +47,13 @@ class PlotCanvas(wx.Panel):
 	def SetMax(self, max_x, max_y):
 		self.max_x = max_x
 		self.max_y = max_y
-		self.str_max_x = self.str_f % self.max_x
-		self.str_max_y = '%d' % self.max_y
+		self.str_max_x = '%d' % self.max_x
+		self.str_max_y = self.str_f % self.max_y
 
 
 	def SetFormat(self, str_f):
 		self.str_f = str_f
+		self.str_max_y = self.str_f % self.max_y
 
 
 	def AddPlot(self, colour):
@@ -88,16 +89,17 @@ class PlotCanvas(wx.Panel):
 		dc.SetTextForeground(self.GetForegroundColour())
 		dc.SetFont(wx.Font(7, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
 
-		padx, pady = dc.GetTextExtent('M' * (max(len(self.str_max_x), int(len(self.str_max_y) / 2)) + 1))
-		left = padx
+		padleft, pady = dc.GetTextExtent('M' * (len(self.str_max_y) + 1))
+		padright, pady = dc.GetTextExtent('M' * (int(len(self.str_max_x) / 2) + 1))
+		left = padleft
 		top = 2 * pady
-		width = width_dc - (2 * left)
+		width = width_dc - (padleft + padright)
 		height = height_dc - (2 * top)
 		text_bottom = top + height + ((pady * 1) / 4)
 
 		dc.SetPen(wx.Pen(self.GetForegroundColour()))
 		dc.SetBrush(wx.BLACK_BRUSH)
-		dc.DrawRectangle(left, top, width, height)
+		dc.DrawRectangle(left, top-2, width, height+2)
 
 		# Valori degli assi
 		wt, ht = dc.GetTextExtent(self.str_max_y)
@@ -109,15 +111,6 @@ class PlotCanvas(wx.Panel):
 
 		wt, ht = dc.GetTextExtent(self.str_max_x)
 		dc.DrawText(self.str_max_x, (left + width) - (wt / 2), text_bottom)
-
-		# Disegno tutti i plot associati
-		for plot in self.plots:
-			plot.Draw(dc, left, top, width, height, self.max_x, self.max_y)
-
-		# Ridisegno il quadrato che contiene il grafico
-		dc.SetPen(wx.Pen(self.GetForegroundColour()))
-		dc.SetBrush(wx.TRANSPARENT_BRUSH)
-		dc.DrawRectangle(left, top, width, height)
 
 		# Disegno i punti intermedi
 		dc.SetPen(wx.Pen(wx.Colour(0x40, 0x40, 0x40), 1, wx.DOT))
@@ -135,8 +128,17 @@ class PlotCanvas(wx.Panel):
 			x = left + ((width * i) / 6)
 			dc.DrawLine(x, top, x, top + height)
 
-			wt, ht = dc.GetTextExtent(self.str_f % val)
-			dc.DrawText(self.str_f % val, x - (wt / 2), text_bottom)
+			wt, ht = dc.GetTextExtent('%d' % val)
+			dc.DrawText('%d' % val, x - (wt / 2), text_bottom)
+
+		# Disegno tutti i plot associati
+		for plot in self.plots:
+			plot.Draw(dc, left, top, width, height, self.max_x, self.max_y)
+
+		# Ridisegno il quadrato che contiene il grafico
+		dc.SetPen(wx.Pen(self.GetForegroundColour()))
+		dc.SetBrush(wx.TRANSPARENT_BRUSH)
+		dc.DrawRectangle(left, top-2, width, height+2)
 
 
 class PlotData(object):
