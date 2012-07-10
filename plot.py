@@ -35,6 +35,7 @@ class PlotCanvas(wx.Panel):
 		self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
 		self.max_x = 1
 		self.max_y = 1
+		self.fs_y = 1
 		self.str_f = '%d'
 		self.str_max_x = '%d' % self.max_x
 		self.str_max_y = self.str_f % self.max_y
@@ -47,8 +48,17 @@ class PlotCanvas(wx.Panel):
 	def SetMax(self, max_x, max_y):
 		self.max_x = max_x
 		self.max_y = max_y
+		self.fs_y = max_y
 		self.str_max_x = '%d' % self.max_x
 		self.str_max_y = self.str_f % self.max_y
+
+
+	def SetFs(self, fs_y):
+		self.fs_y = fs_y
+
+		if fs_y > self.max_y:
+			self.max_y = fs_y
+			self.str_max_y = self.str_f % self.max_y
 
 
 	def SetFormat(self, str_f):
@@ -116,12 +126,19 @@ class PlotCanvas(wx.Panel):
 		dc.SetPen(wx.Pen(wx.Colour(0x40, 0x40, 0x40), 1, wx.DOT))
 
 		for i in range(1, 5):
-			val = self.max_y - (self.max_y * (i / 5))
-			y = top + ((height * i) / 5)
+			val = self.fs_y * (i / 5)
+			y = top + (height - ((height * val) / self.max_y))
 			dc.DrawLine(left, y, left + width, y)
 
 			wt, ht = dc.GetTextExtent(self.str_f % val)
 			dc.DrawText(self.str_f % val, text_right - wt, y - (ht / 2))
+
+		if self.fs_y != self.max_y:
+			y = top + (height - ((height * self.fs_y) / self.max_y))
+			dc.DrawLine(left, y, left + width, y)
+
+			wt, ht = dc.GetTextExtent(self.str_f % self.fs_y)
+			dc.DrawText(self.str_f % self.fs_y, text_right - wt, y - (ht / 2))
 
 		for i in range(1, 6):
 			val = self.max_x * (i / 6)
